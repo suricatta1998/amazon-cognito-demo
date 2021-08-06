@@ -1,0 +1,20 @@
+{
+  "name": "amazon-cognito-demo",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "alpinejs": "^3.2.2",
+    "autoprefixer": "^10.3.1",
+    "postcss": "^8.3.6",
+    "tailwindcss": "^2.2.7",
+    "vite": "^2.4.3"
+  },
+  "dependencies": {
+    "@aws-amplify/auth": "^4.2.0",
+    "@aws-amplify/core": "^4.2.2"
+  }
+}

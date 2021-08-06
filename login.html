@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录页面</title>
+  </head>
+  <script>
+    window.global = window;
+  </script>
+  <body>
+    <div
+      x-data="{
+				confirming: false,
+				email: '',
+				password: '',
+				code: '',
+				errors: {},
+				...utilities(),
+				...validates()
+			}"
+      class="h-screen bg-gray-50 flex flex-col items-center justify-center"
+    >
+      <h1 class="text-2xl font-bold my-8">Amazon Cognito Login</h1>
+      <form
+        x-data="{
+					loading: false,
+					errMsg: ''
+				}"
+        action=""
+        @submit.prevent="async () => {
+					loading = true;
+					try {
+						let user = await login({ email, password });
+						location.href = '/index.html';
+					} catch(error) {
+						let { code } = error;
+						if (code === 'UserNotConfirmedException') {
+							alert('该用户还未验证邮箱！');
+							resendCode(email);
+							errMsg = '';
+							confirming = true;
+						} else if (code === 'NotAuthorizedException') {
+							errMsg = '邮箱或密码不正确';
+						}
+					}
+					loading = false;
+				}"
+        class="w-1/2 md:w-1/4 flex flex-col items-center"
+      >
+        <div class="relative w-full mt-6">
+          <input
+            id="email"
+            name="email"
+            type="email"
+            x-model="email"
+            placeholder="邮箱"
+            :disabled="confirming"
+            x-init="$watch('email', value => {
+              let isValid = checkEmail(value);
+              errors.email = isValid ? '' : '邮箱格式不正确';
+            })"
+            @blur="() => {
+							if (email === '') {
+								errors.email = '邮箱不能为空'
+							}
+						}"
+            class="
+              w-full
+              peer
+              py-0.5
+              border-b-2 border-indigo-300
+              bg-transparent
+              placeholder-transparent
+              focus:outline-none focus:border-indigo-600
+            "
+            :class="errors.email ? 'border-red-600' : ''"
+            required
+          />
+          <label
+            for="email"
+            class="
+              absolute
+              transition-all
+              left-0
+              -top-5
+              text-sm
+              peer-placeholder-shown:top-1
+              peer-placeholder-shown:text-base
+              peer-placeholder-shown:text-gray-500
+              peer-focus:-top-5 peer-focus:text-sm peer-focus:text-gray-700
+            "
+          >
+            邮箱
+          </label>
+          <span
+            class="text-sm text-red-500"
+            x-show="errors.email"
+            x-text="errors.email"
+          ></span>
+        </div>
+
+        <div class="relative w-full mt-6">
+          <input
+            x-ref="passwordInput"
+            id="password"
+            name="password"
+            type="password"
+            x-model="password"
+            :readonly="confirming"
+            placeholder="密码"
+            minlength="8"
+            maxlength="30"
+            pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W_]).{8,}"
+            title="密码必须包含大小写字母、数字和特殊字符且至少8位字符"
+            x-init="$watch('password', value => {
+              let isValid = checkPassword(value);
+              errors.password = isValid ? '' : '密码必须包含大小写字母、数字和特殊字符且至少8位字符'
+            })"
+            @blur="() => {
+              if (password === '') {
+                errors.password = '密码不能为空';
+              } 
+            }"
+            class="
+              w-full
+              peer
+              py-0.5
+              border-b-2 border-indigo-300
+              bg-transparent
+              placeholder-transparent
+              focus:outline-none focus:border-indigo-600
+            "
+            :class="errors.password ? 'border-red-600' : ''"
+            required
+          />
+          <label
+            for="password"
+            class="
+              absolute
+              transition-all
+              left-0
+              -top-5
+              text-sm
+              peer-placeholder-shown:top-1
+              peer-placeholder-shown:text-base
+              peer-placeholder-shown:text-gray-500
+              peer-focus:-top-5 peer-focus:text-sm peer-focus:text-gray-700
+            "
+          >
+            密码
+          </label>
+          <span
+            class="text-sm text-red-500"
+            x-show="errors.password"
+            x-text="errors.password"
+          ></span>
+          <svg
+            t="1628234964406"
+            class="
+              h-5
+              w-5
+              fill-current
+              stroke-current
+              text-gray-600
+              cursor-pointer
+              hover:text-gray-500
+              absolute
+              top-1.5
+              right-0
+            "
+            @click="togglePasswordStatus($refs.passwordInput)"
+            x-show="password !== ''"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="5110"
+          >
+            <path
+              d="M512 832C298.112 832 127.488 725.312 0 512c129.408-213.312 300.032-320 512-320 211.968 0 382.592 106.688 512 320-127.488 213.312-298.112 320-512 320z m0-64a256 256 0 1 0 0-512 256 256 0 0 0 0 512z m0-128a128 128 0 1 0 0-256 128 128 0 0 0 0 256z"
+              p-id="5111"
+            ></path>
+          </svg>
+        </div>
+
+        <span
+          class="mt-4 text-sm text-red-500"
+          x-show="errMsg"
+          x-text="errMsg"
+        ></span>
+
+        <button
+          class="
+            flex
+            items-center
+            mt-6
+            bg-blue-400
+            text-white
+            px-6
+            py-2
+            rounded
+            hover:bg-blue-500
+            disabled:bg-blue-300 disabled:cursor-default
+          "
+          :disabled="checkErrors(errors) || loading"
+          type="submit"
+          x-show="!confirming"
+        >
+          <svg
+            t="1628235915911"
+            class="h-4 w-4 mr-2 fill-current stroke-current text-gray-500"
+            :class="loading ? 'animate-spin' : 'hidden'"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="2165"
+          >
+            <path
+              d="M96 512c0-19.33 15.67-35 35-35s35 15.67 35 35c0 191.09 154.91 346 346 346s346-154.91 346-346-154.91-346-346-346c-19.33 0-35-15.67-35-35s15.67-35 35-35c229.75 0 416 186.25 416 416S741.75 928 512 928 96 741.75 96 512z"
+              p-id="2166"
+            ></path>
+          </svg>
+          登录
+        </button>
+      </form>
+
+      <form
+        x-data="{
+					loading: false,
+					errMsg: ''
+				}"
+        x-show="confirming"
+        @submit.prevent="async () => {
+					loading = true;
+					try {
+						await confirmRegister({ email, code });
+						await login({ email, password });
+						location.href = '/index.html';
+					} catch (error) {
+						let { code } = error;
+						if (code === 'CodeMismatchException') {
+							errMsg = '邮箱验证码不正确';
+						}
+					}
+					loading = false;
+				}"
+        class="transition-all w-1/2 md:w-1/4 mt-6 flex flex-col items-center"
+      >
+        <div class="w-full flex justify-between">
+          <div class="relative flex-grow">
+            <input
+              id="code"
+              name="code"
+              x-model="code"
+              type="text"
+              minlength="6"
+              maxlength="6"
+              pattern="^\d{6}$"
+              title="验证码必须为6位数字"
+              placeholder="邮箱验证码"
+              required
+              class="
+                w-full
+                peer
+                py-0.5
+                border-b-2 border-indigo-300
+                bg-transparent
+                placeholder-transparent
+                focus:outline-none focus:border-indigo-600
+              "
+            />
+            <label
+              for="code"
+              class="
+                absolute
+                transition-all
+                left-0
+                -top-5
+                text-sm
+                peer-placeholder-shown:top-1
+                peer-placeholder-shown:text-base
+                peer-placeholder-shown:text-gray-500
+                peer-focus:-top-5 peer-focus:text-sm peer-focus:text-gray-700
+              "
+            >
+              邮箱验证码
+            </label>
+          </div>
+          <button
+            x-data="{
+							timer: null,
+							count: 60,
+							maxCount: 60
+						}"
+            x-init="$watch('count', value => {
+							if (value === 0) {
+								clearInterval(timer);
+								timer = null;
+								count = maxCount;
+							}
+						})"
+            class="
+              ml-1
+              px-3
+              py-1
+              rounded
+              bg-indigo-400
+              text-white text-xs
+              hover:bg-indigo-500
+              active:bg-indigo-400
+              disabled:bg-indigo-300 disabled:cursor-default
+            "
+            @click.debounce="() => {
+							if (timer === null) {
+								timer = setInterval(() => count--, 1000);
+								resendCode(email);
+							}
+						}"
+            type="button"
+            :disabled="count !== maxCount"
+            x-text="count === maxCount ? '重新发送' : count"
+          ></button>
+        </div>
+        <span
+          class="text-sm text-red-500"
+          x-show="errMsg"
+          x-text="errMsg"
+        ></span>
+        <button
+          class="
+            flex
+            items-center
+            mt-6
+            bg-blue-400
+            text-white
+            px-6
+            py-2
+            rounded
+            hover:bg-blue-500
+            disabled:bg-blue-300 disabled:cursor-default
+          "
+          :disabled="code === '' || loading"
+          type="submit"
+        >
+          <svg
+            t="1628235915911"
+            class="h-4 w-4 mr-2 fill-current stroke-current text-gray-500"
+            :class="loading ? 'animate-spin' : 'hidden'"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="2165"
+          >
+            <path
+              d="M96 512c0-19.33 15.67-35 35-35s35 15.67 35 35c0 191.09 154.91 346 346 346s346-154.91 346-346-154.91-346-346-346c-19.33 0-35-15.67-35-35s15.67-35 35-35c229.75 0 416 186.25 416 416S741.75 928 512 928 96 741.75 96 512z"
+              p-id="2166"
+            ></path>
+          </svg>
+          确认邮箱
+        </button>
+      </form>
+
+      <a
+        href="/register.html"
+        class="
+          mt-4
+          text-sm text-blue-800
+          underline
+          hover:text-blue-500
+          active:text-blue-800
+        "
+      >
+        还没有账号？前往注册</a
+      >
+    </div>
+  </body>
+  <script src="./main.js" type="module"></script>
+</html>

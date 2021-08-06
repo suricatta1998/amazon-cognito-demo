@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>首页</title>
+  </head>
+  <script>
+    window.global = window;
+  </script>
+  <body>
+    <div
+      x-data="{
+        user: {},
+        ...utilities()
+      }"
+      x-init="user = (await getUserinfo())?.attributes"
+      class="h-screen bg-indigo-300 flex items-center justify-center"
+    >
+      <div
+        class="h-1/2 w-1/2 md:w-1/3 relative bg-indigo-500 rounded-lg shadow-lg"
+      >
+        <h1
+          class="text-center text-indigo-100 mt-4 text-lg md:text-2xl font-bold"
+        >
+          Amazon Cognito Demo
+        </h1>
+
+        <div class="w-full p-4 mt-12">
+          <div x-show="user">
+            <h2
+              class="text-lg md:text-2xl text-center text-yellow-300"
+              x-text="`你好, ${user?.nickname ?? 'loading...'}!`"
+            ></h2>
+          </div>
+          <div x-show="!user">
+            <h2
+              class="
+                text-xl
+                md:text-2xl
+                text-center
+                font-bold
+                text-yellow-100
+                tracking-widest
+              "
+            >
+              Welcome!
+            </h2>
+          </div>
+        </div>
+
+        <div
+          class="
+            absolute
+            rounded-b-lg
+            inset-x-0
+            bottom-0
+            w-full
+            px-4
+            h-10
+            bg-yellow-200
+            flex
+            items-center
+            justify-between
+          "
+        >
+          <p
+            class="
+              w-2/3
+              text-sm text-indigo-800
+              font-bold
+              overflow-hidden
+              truncate
+            "
+            x-text="user?.email ?? ''"
+          ></p>
+
+          <div>
+            <a
+              x-show="!user"
+              href="/login.html"
+              class="
+                transition-all
+                mr-1
+                text-sm text-indigo-600
+                font-bold
+                hover:underline hover:text-base hover:text-indigo-500
+              "
+              >登录</a
+            >
+            <a
+              x-show="!user"
+              href="/register.html"
+              class="
+                transition-all
+                text-sm text-indigo-600
+                font-bold
+                hover:underline hover:text-base hover:text-indigo-500
+              "
+              >注册</a
+            >
+
+            <a
+              x-show="user"
+              @click.debounce.750="async () => {
+                try {
+                  await logout();
+                  location.reload();
+                } catch (error) {
+                  console.log(error);
+                }
+              }"
+              class="
+                transition-all
+                mr-1
+                text-sm text-indigo-600
+                font-bold
+                hover:underline
+                hover:text-base
+                hover:text-indigo-500
+                hover:cursor-pointer
+              "
+              >登出</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="./main.js" type="module"></script>
+</html>
