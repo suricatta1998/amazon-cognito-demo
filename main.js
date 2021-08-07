@@ -4,10 +4,10 @@ import { Auth } from "@aws-amplify/auth";
 import Amplify from "@aws-amplify/core";
 
 // Amazon Cognito
-export const USER_POOL_ID = "";
-export const APP_CLIENT_ID = "";
-export const IDENTITY_POOL_ID = "";
-export const REGION = "";
+const USER_POOL_ID = "";
+const APP_CLIENT_ID = "";
+const IDENTITY_POOL_ID = "";
+const REGION = "";
 
 Amplify.configure({
 	Auth: {
