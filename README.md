@@ -65,3 +65,46 @@
    # 或者
    yarn build
    ```
+
+## 主要代码片段
+
+- 配置
+
+  ```js
+  import { Auth } from "@aws-amplify/auth";
+  import Amplify from "@aws-amplify/core";
+  Amplify.configure({
+    Auth: {
+      userPoolId: USER_POOL_ID,
+      userPoolWebClientId: APP_CLIENT_ID,
+      identityPoolId: IDENTITY_POOL_ID,
+      region: REGION,
+    },
+  });
+  ```
+
+- 登录
+
+  ```js
+  const login = ({ email, password }) => Auth.signIn(email, password);
+  ```
+
+- 注册
+
+  ```js
+  const register = ({ email, password, nickname }) => {
+    return Auth.signUp({
+      username: email,
+      password,
+      attributes: {
+        nickname,
+      },
+    });
+  };
+  ```
+
+- 登出
+
+  ```js
+  const logout = () => Auth.signOut({ global: true });
+  ```

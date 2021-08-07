@@ -24,17 +24,11 @@ window.utilities = () => ({
 		_input.type = type === 'password' ? 'text' : 'password';
 	},
 
-	login: ({ email, password }) => {
-		return Auth.signIn(email, password);
-	},
+	login: ({ email, password }) => Auth.signIn(email, password),
 
-	logout: () => {
-		return Auth.signOut({ global: true });
-	},
+	logout: () => Auth.signOut({ global: true }),
 
-	getUserinfo: () => {
-		return Auth.currentUserInfo()
-	},
+	getUserinfo: () => Auth.currentUserInfo(),
 	
   register: ({ email, password, nickname }) => {
 		return Auth.signUp({
@@ -46,13 +40,9 @@ window.utilities = () => ({
 		})
 	},
 
-	confirmRegister: ({ email, code }) => {
-		return Auth.confirmSignUp(email, code);
-	},
+	confirmRegister: ({ email, code }) => Auth.confirmSignUp(email, code),
 
-	resendCode: (email) => {
-		return Auth.resendSignUp(email)
-	}
+	resendCode: (email) => Auth.resendSignUp(email)
 });
 
 const EMAIL_RE = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
